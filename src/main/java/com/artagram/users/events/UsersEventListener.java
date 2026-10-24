@@ -35,7 +35,7 @@ public class UsersEventListener {
     @Transactional
     public void onUserRegistered(Map<String, Object> payload) {
         try {
-            UUID id = UUID.fromString((String) payload.get("id"));
+            UUID id = UUID.fromString((String) payload.get("usuarioId"));
             String nombreArtista = (String) payload.get("nombreArtista");
             String correo = (String) payload.get("correo");
             Boolean premium = (Boolean) payload.get("premium");
@@ -61,11 +61,27 @@ public class UsersEventListener {
     @Transactional
     public void onUserDeleted(Map<String, Object> payload) {
         try {
-            UUID id = UUID.fromString((String) payload.get("id"));
+            UUID id = UUID.fromString((String) payload.get("usuarioId"));
             usuarioRepo.deleteById(id);
             log.info("Usuario eliminado en artagram-users para id={}", id);
         } catch (Exception ex) {
             log.error("Error al procesar user.deleted en artagram-users: {}", ex.getMessage());
+        }
+    }
+
+    @RabbitListener(queues = UsersRabbitMqConfig.QUEUE_SUBSCRIPTION_UPDATED)
+    @Transactional
+    public void onSubscriptionUpdated(Map<String, Object> payload) {
+        try {
+            UUID id = UUID.fromString(String.valueOf(payload.get("usuarioId")));
+            boolean premium = Boolean.TRUE.equals(payload.get("premium"));
+            usuarioRepo.findById(id).ifPresent(u -> {
+                u.setPremium(premium);
+                usuarioRepo.save(u);
+                log.info("Estado premium sincronizado en artagram-users: usuarioId={}, premium={}", id, premium);
+            });
+        } catch (Exception ex) {
+            log.error("Error al procesar subscription.updated en artagram-users: {}", ex.getMessage());
         }
     }
 }

@@ -34,7 +34,10 @@ public class JwtUserResolver {
                 Claims claims = validator.validarYExtraer(token);
                 UUID id = UUID.fromString(claims.getSubject());
                 String nombre = claims.get("nombre", String.class);
-                String roles = claims.get("roles", String.class);
+                // El token lo emite artagram-auth con el claim "rol" (ver RsaJwtService),
+                // nunca "roles" — leer "roles" aqui siempre daba null y ningun chequeo de
+                // rol en este servicio funcionaba de verdad.
+                String roles = claims.get("rol", String.class);
                 Boolean premium = claims.get("premium", Boolean.class);
                 return Optional.of(new UsuarioAutenticado(id, nombre != null ? nombre : "artista", claims.get("email", String.class), roles, Boolean.TRUE.equals(premium)));
             } catch (Exception ignored) {

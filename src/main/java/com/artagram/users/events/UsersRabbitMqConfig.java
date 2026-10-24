@@ -18,6 +18,7 @@ public class UsersRabbitMqConfig {
 
     public static final String QUEUE_USER_REGISTERED = "users.user.registered";
     public static final String QUEUE_USER_DELETED = "users.user.deleted";
+    public static final String QUEUE_SUBSCRIPTION_UPDATED = "users.subscription.updated";
 
     @Bean
     public TopicExchange eventsExchange() {
@@ -53,5 +54,18 @@ public class UsersRabbitMqConfig {
     @Bean
     public Binding usersUserDeletedBinding(Queue usersUserDeletedQueue, TopicExchange eventsExchange) {
         return BindingBuilder.bind(usersUserDeletedQueue).to(eventsExchange).with("user.deleted");
+    }
+
+    @Bean
+    public Queue usersSubscriptionUpdatedQueue() {
+        return QueueBuilder.durable(QUEUE_SUBSCRIPTION_UPDATED)
+                .deadLetterExchange(DLX_EXCHANGE)
+                .deadLetterRoutingKey(QUEUE_SUBSCRIPTION_UPDATED + ".dlq")
+                .build();
+    }
+
+    @Bean
+    public Binding usersSubscriptionUpdatedBinding(Queue usersSubscriptionUpdatedQueue, TopicExchange eventsExchange) {
+        return BindingBuilder.bind(usersSubscriptionUpdatedQueue).to(eventsExchange).with("subscription.updated");
     }
 }
