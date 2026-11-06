@@ -2,9 +2,11 @@ package com.artagram.users.controller;
 
 import com.artagram.users.common.JwtUserResolver;
 import com.artagram.users.dto.ArtistaEnVivo;
+import com.artagram.users.dto.ArtistaRecomendado;
 import com.artagram.users.dto.ArtistaResumen;
 import com.artagram.users.dto.Seguimiento;
 import com.artagram.users.service.ActividadEnVivoService;
+import com.artagram.users.service.RecomendacionArtistasService;
 import com.artagram.users.service.SeguidorService;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -23,11 +25,14 @@ public class ArtistaController {
 
     private final SeguidorService seguidorService;
     private final ActividadEnVivoService actividadEnVivo;
+    private final RecomendacionArtistasService recomendaciones;
     private final JwtUserResolver userResolver;
 
-    public ArtistaController(SeguidorService seguidorService, ActividadEnVivoService actividadEnVivo, JwtUserResolver userResolver) {
+    public ArtistaController(SeguidorService seguidorService, ActividadEnVivoService actividadEnVivo,
+                             RecomendacionArtistasService recomendaciones, JwtUserResolver userResolver) {
         this.seguidorService = seguidorService;
         this.actividadEnVivo = actividadEnVivo;
+        this.recomendaciones = recomendaciones;
         this.userResolver = userResolver;
     }
 
@@ -35,6 +40,11 @@ public class ArtistaController {
     public ResponseEntity<List<ArtistaResumen>> buscar(@RequestParam(defaultValue = "") String q, HttpServletRequest request) {
         var usuario = userResolver.resolverRequerido(request);
         return ResponseEntity.ok(seguidorService.buscar(q, usuario.id()));
+    }
+
+    @GetMapping("/recomendados")
+    public ResponseEntity<List<ArtistaRecomendado>> recomendados(@RequestParam(defaultValue = "10") int limite, HttpServletRequest request) {
+        return ResponseEntity.ok(recomendaciones.recomendar(userResolver.resolverRequerido(request).id(), limite));
     }
 
     @GetMapping("/siguiendo/en-vivo")
