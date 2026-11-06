@@ -44,7 +44,8 @@ public class SeguidorService {
         } else {
             seguidorRepo.save(new Seguidor(seguidorId, seguidoId));
             nuevoEstadoLoSigo = true;
-            eventPublisher.publicarFollowCreado(seguidorId, seguidoId);
+            String seguidorNombre = usuarioRepo.findById(seguidorId).map(Usuario::getNombreArtista).orElse("Un artista");
+            eventPublisher.publicarFollowCreado(seguidorId, seguidorNombre, seguidoId);
         }
 
         long total = seguidorRepo.countById_SeguidoId(seguidoId);

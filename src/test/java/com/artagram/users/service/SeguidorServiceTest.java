@@ -10,6 +10,7 @@ import com.artagram.users.domain.Usuario;
 import com.artagram.users.domain.UsuarioRepository;
 import com.artagram.users.events.UsersEventPublisher;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
@@ -18,7 +19,8 @@ class SeguidorServiceTest {
     private final UUID yo = UUID.randomUUID();
     private final SeguidorRepository seguidores = mock(SeguidorRepository.class);
     private final UsuarioRepository usuarios = mock(UsuarioRepository.class);
-    private final SeguidorService service = new SeguidorService(seguidores, usuarios, mock(UsersEventPublisher.class));
+    private final UsersEventPublisher eventos = mock(UsersEventPublisher.class);
+    private final SeguidorService service = new SeguidorService(seguidores, usuarios, eventos);
 
     @Test
     void laBusquedaIndicaSiYaLoSigoYSusSeguidores() {
@@ -42,5 +44,17 @@ class SeguidorServiceTest {
         service.buscar("", yo);
 
         verify(usuarios).findTop20ByNombreArtistaContainingIgnoreCaseAndIdNotOrderByNombreArtistaAsc("", yo);
+    }
+
+    @Test
+    void elEventoDeSeguirLlevaElNombreDelSeguidor() {
+        UUID seguidoId = UUID.randomUUID();
+        Usuario seguidor = mock(Usuario.class);
+        when(seguidor.getNombreArtista()).thenReturn("lucia");
+        when(usuarios.findById(yo)).thenReturn(Optional.of(seguidor));
+
+        service.toggleSeguir(yo, seguidoId);
+
+        verify(eventos).publicarFollowCreado(yo, "lucia", seguidoId);
     }
 }
