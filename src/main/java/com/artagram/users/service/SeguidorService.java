@@ -8,6 +8,7 @@ import com.artagram.users.domain.UsuarioRepository;
 import com.artagram.users.dto.ArtistaResumen;
 import com.artagram.users.dto.Seguimiento;
 import com.artagram.users.events.UsersEventPublisher;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,6 +49,15 @@ public class SeguidorService {
 
         long total = seguidorRepo.countById_SeguidoId(seguidoId);
         return new Seguimiento(nuevoEstadoLoSigo, total);
+    }
+
+    /** Con el texto vacio devuelve artistas para descubrir. */
+    public List<ArtistaResumen> buscar(String texto, UUID solicitanteId) {
+        return usuarioRepo.findTop20ByNombreArtistaContainingIgnoreCaseAndIdNotOrderByNombreArtistaAsc(texto.trim(), solicitanteId).stream()
+                .map(u -> new ArtistaResumen(u.getId(), u.getNombreArtista(),
+                        seguidorRepo.existsById_SeguidorIdAndId_SeguidoId(solicitanteId, u.getId()),
+                        seguidorRepo.countById_SeguidoId(u.getId())))
+                .toList();
     }
 
     public ArtistaResumen resumenArtista(UUID artistaId, UUID solicitanteId) {
