@@ -19,10 +19,11 @@ public class UsersEventPublisher {
         this.rabbitTemplate = rabbitTemplate;
     }
 
-    public void publicarFollowCreado(UUID seguidorId, UUID seguidoId) {
+    public void publicarFollowCreado(UUID seguidorId, String seguidorNombre, UUID seguidoId) {
         Map<String, Object> evento = Map.of(
                 "tipo", "FOLLOW_CREADO",
                 "seguidorId", seguidorId.toString(),
+                "seguidorNombre", seguidorNombre,
                 "seguidoId", seguidoId.toString(),
                 "timestamp", Instant.now().toString()
         );

@@ -11,13 +11,16 @@ import com.artagram.users.domain.UsuarioRepository;
 import com.artagram.users.dto.ActualizarPerfilRequest;
 import com.artagram.users.dto.PerfilResponse;
 import com.artagram.users.storage.StorageService;
+import java.io.IOException;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class PerfilService {
@@ -26,6 +29,11 @@ public class PerfilService {
     private final ObraDestacadaRepository obraRepo;
     private final UsuarioRepository usuarioRepo;
     private final StorageService storageService;
+
+    private static final Map<String, String> EXTENSIONES_FOTO = Map.of(
+            "image/jpeg", ".jpg",
+            "image/png", ".png",
+            "image/webp", ".webp");
 
     public PerfilService(PerfilRepository perfilRepo,
                          ObraDestacadaRepository obraRepo,
@@ -100,6 +108,33 @@ public class PerfilService {
         }
 
         return aDto(perfil, true);
+    }
+
+    /** Sin transaccion: la subida a S3 no debe retener una conexion de base de datos. */
+    public String actualizarFoto(UUID usuarioId, MultipartFile archivo) {
+        if (archivo == null || archivo.isEmpty()) {
+            throw ApiException.badRequest("DATOS_INVALIDOS", "La imagen es obligatoria");
+        }
+        String extension = EXTENSIONES_FOTO.get(archivo.getContentType());
+        if (extension == null) {
+            throw ApiException.badRequest("FORMATO_NO_SOPORTADO", "Solo se admiten imágenes JPG, PNG o WEBP");
+        }
+        Usuario usuario = usuarioRepo.findById(usuarioId)
+                .orElseThrow(() -> ApiException.notFound("USUARIO_NO_ENCONTRADO", "Usuario no encontrado"));
+
+        String ruta;
+        try {
+            ruta = storageService.guardar("avatars", "foto" + extension, archivo.getBytes(), archivo.getContentType());
+        } catch (IOException ex) {
+            throw ApiException.badRequest("ERROR_STORAGE", "No se pudo leer el archivo");
+        }
+
+        Perfil perfil = perfilRepo.findByUsuarioId(usuarioId)
+                .orElseGet(() -> new Perfil(UUID.randomUUID(), usuario, "Artista en ArtaGram", null));
+        perfil.setFotoUrl(ruta);
+        perfil.setActualizadoEn(Instant.now());
+        perfilRepo.save(perfil);
+        return storageService.resolverUrlPublica(ruta);
     }
 
     private PerfilResponse aDto(Perfil p, boolean esPropio) {
