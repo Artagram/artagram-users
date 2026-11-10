@@ -21,9 +21,11 @@ public class JwtUserResolver {
     public Optional<UsuarioAutenticado> resolverOpcional(HttpServletRequest request) {
         String headerUserId = request.getHeader("X-User-Id");
         if (headerUserId != null && !headerUserId.isBlank()) {
-            String roles = request.getHeader("X-User-Roles");
-            String nombre = request.getHeader("X-User-Nombre");
-            if (nombre == null) nombre = "artista";
+            // Mismos nombres que pone artagram-gateway (JwtGatewayGlobalFilter): con
+            // "X-User-Roles" el rol llegaba null y el panel de admin rechazaba a todos.
+            String roles = request.getHeader("X-User-Role");
+            String nombre = request.getHeader("X-User-Name");
+            if (nombre == null || nombre.isBlank()) nombre = "artista";
             return Optional.of(new UsuarioAutenticado(UUID.fromString(headerUserId), nombre, null, roles, false));
         }
 
