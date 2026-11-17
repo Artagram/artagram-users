@@ -57,9 +57,9 @@ artagram:
     proveedor: ${PAGO_PROVEEDOR:fake}
     mercadopago-access-token: ${MP_ACCESS_TOKEN:}
   observability:
-    grafana-tecnico-url: ${GRAFANA_URL:http://localhost:3001}/d/artagram-tecnico
-    grafana-negocio-url: ${GRAFANA_URL:http://localhost:3001}/d/artagram-negocio
-    prometheus-url: ${PROMETHEUS_URL:http://localhost:9090}
+    grafana-tecnico-url: ${GRAFANA_URL:http://localhost:3001/grafana}/d/artagram-tecnico
+    grafana-negocio-url: ${GRAFANA_URL:http://localhost:3001/grafana}/d/artagram-negocio
+    prometheus-url: ${PROMETHEUS_URL:http://localhost:3001/grafana/explore}
 
 management:
   endpoints:

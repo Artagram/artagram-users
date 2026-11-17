@@ -25,13 +25,13 @@ public class DashboardController {
 
     private final JwtUserResolver userResolver;
 
-    @Value("${app.observability.grafana-tecnico-url:http://localhost:3001/d/artagram-tecnico}")
+    @Value("${app.observability.grafana-tecnico-url:http://localhost:3001/grafana/d/artagram-tecnico}")
     private String panelTecnicoUrl;
 
-    @Value("${app.observability.grafana-negocio-url:http://localhost:3001/d/artagram-negocio}")
+    @Value("${app.observability.grafana-negocio-url:http://localhost:3001/grafana/d/artagram-negocio}")
     private String panelNegocioUrl;
 
-    @Value("${app.observability.prometheus-url:http://localhost:9090}")
+    @Value("${app.observability.prometheus-url:http://localhost:3001/grafana/explore}")
     private String prometheusUrl;
 
     public DashboardController(JwtUserResolver userResolver) {
