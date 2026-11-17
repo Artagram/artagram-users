@@ -73,15 +73,20 @@ class DominioUsersTest {
         assertThat(new ObraDestacada().getId()).isNull();
 
         EnlacePerfil enlace = new EnlacePerfil("web", "https://a");
-        assertThat(enlace).isEqualTo(enlace).isEqualTo(new EnlacePerfil("web", "https://a"))
-                .isNotEqualTo(new EnlacePerfil("web", "https://b")).isNotEqualTo("x");
+        Object otroTipo = "x";
+        assertThat(enlace.equals(enlace)).isTrue();
+        assertThat(enlace.equals(otroTipo)).isFalse();
+        assertThat(enlace).isEqualTo(new EnlacePerfil("web", "https://a"))
+                .isNotEqualTo(new EnlacePerfil("web", "https://b"));
         assertThat(enlace.hashCode()).isEqualTo(new EnlacePerfil("web", "https://a").hashCode());
         assertThat(new EnlacePerfil().getEtiqueta()).isNull();
 
         UUID otro = UUID.randomUUID();
         Seguidor.SeguidorId sid = new Seguidor(id, otro).getId();
-        assertThat(sid).isEqualTo(sid).isEqualTo(new Seguidor.SeguidorId(id, otro))
-                .isNotEqualTo(new Seguidor.SeguidorId(otro, id)).isNotEqualTo("x");
+        assertThat(sid.equals(sid)).isTrue();
+        assertThat(sid.equals(otroTipo)).isFalse();
+        assertThat(sid).isEqualTo(new Seguidor.SeguidorId(id, otro))
+                .isNotEqualTo(new Seguidor.SeguidorId(otro, id));
         assertThat(sid.hashCode()).isEqualTo(new Seguidor.SeguidorId(id, otro).hashCode());
         assertThat(sid.getSeguidorId()).isEqualTo(id);
         assertThat(sid.getSeguidoId()).isEqualTo(otro);
